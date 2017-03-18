@@ -2,7 +2,7 @@
 #include <string>
 
 #include "RGBImage.hpp"
-#include "rgbqize.hpp"
+#include "RGBQuantize.hpp"
 
 #include <gnuplot-iostream.h>
 /* #include "RGBImageGPext.hpp" */
@@ -12,6 +12,10 @@ void PrintUsage(const std::string& name)
 	std::cerr << "Usage: " << name << "<options> FILE\n"
 		        << "FILE is a png or jpeg image.\n"
 	          << "Options:\n"
+						<< "\t-t, --terminal: Default=png\n"
+						<< "\t\tSelects the gnuplot terminal.\n"
+						<< "\t-o, --output: Default=gnuplot.png\n"
+						<< "\t\tThe output filename.\n"
 						<< "\t---" << std::endl;
 }
 
@@ -21,11 +25,12 @@ int main(int argc, char* argv[])
 		PrintUsage(argv[0]);
 		return 1;
 	}
-	
+
 	// Defaults
 	std::string terminal = "pngcairo";
 	std::string output = "gnuplot.png";
 
+	// Arguments
 	for (int i=1; i < argc; ++i) {
 		std::string arg = argv[i];
 		if (arg == "-h" || arg == "--help") {
