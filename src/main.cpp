@@ -9,14 +9,15 @@
 
 void PrintUsage(const std::string& name)
 {
-	std::cerr << "Usage: " << name << "<options> FILE\n"
-		        << "FILE is a png or jpeg image.\n"
-	          << "Options:\n"
-						<< "\t-t, --terminal: Default=png\n"
-						<< "\t\tSelects the gnuplot terminal.\n"
-						<< "\t-o, --output: Default=gnuplot.png\n"
-						<< "\t\tThe output filename.\n"
-						<< "\t---" << std::endl;
+	std::cerr << "Usage: " << name << " [OPTION]... FILE\n"
+		<< "Where FILE is a png or jpeg image.\n"
+		<< "Options:\n"
+		<< "\t-a, --algorithm ALGORITHM\tthe quantisation method\n"
+		<< "\t\t\t\t\t(mmc, hist, kmeans)\n"
+		<< "\t-h, --help\t\t\tprints this usage message.\n"
+		<< "\t-o, --output FILENAME\n"
+		<< "\t-t, --terminal TERMINAL\t\tthe gnuplot terminal.\n"
+		<< std::endl;
 }
 
 int main(int argc, char* argv[])
@@ -27,8 +28,9 @@ int main(int argc, char* argv[])
 	}
 
 	// Defaults
-	std::string terminal = "pngcairo";
+	std::string algorithm = "mmc";
 	std::string output = "gnuplot.png";
+	std::string terminal = "pngcairo";
 
 	// Arguments
 	for (int i=1; i < argc; ++i) {
@@ -36,10 +38,12 @@ int main(int argc, char* argv[])
 		if (arg == "-h" || arg == "--help") {
 			PrintUsage(argv[0]);
 			return 0;
-		} else if (arg == "-t" || arg == "--terminal") {
-			terminal = std::string(argv[i+1]);
+		} else if (arg == "-a" || arg == "--algorithm") {
+			algorithm = std::string(argv[i+1]);
 		} else if (arg == "-o" || arg == "--output") {
 			output = std::string(argv[i+1]);
+		} else if (arg == "-t" || arg == "--terminal") {
+			terminal = std::string(argv[i+1]);
 		}
 	}
 
@@ -53,13 +57,23 @@ int main(int argc, char* argv[])
 	} else if (file_ext == "jpg" || file_ext == "jpeg") {
 		if(!img.LoadJpegFile(img_file)) return 1;
 	} else {
+		std::cerr << "Invalied file extenison!" << std::endl;
 		PrintUsage(argv[0]);
 		return 1;
 	}
 
 	std::cout << img << std::endl;
 
-	auto colors = rgbq::ExtractColors_MedianCut(img, 8, 5);
+	std::vector<RGBPixel> colors;
+	if (algorithm == "mmc") {
+		colors = rgbq::ExtractColors_MedianCut(img, 8, 4);
+	} else if (algorithm == "hist") {
+		colors = rgbq::ExtractColors_Histogram(img, 8, 4);
+	} else {
+		std::cerr << "Invalid algorithm!" << std::endl;
+		PrintUsage(argv[0]);
+		return 1;
+	}
 
 	// Plot
 	Gnuplot gp;
