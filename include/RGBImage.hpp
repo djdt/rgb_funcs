@@ -36,16 +36,16 @@ class RGBImage
 		friend std::ostream& operator<<(
 				std::ostream& os, const RGBImage& img);
 
-		bool loadPngFile (const std::string& file);
-		bool loadJpegFile(const std::string& file);
+		bool LoadPngFile (const std::string& file);
+		bool LoadJpegFile(const std::string& file);
 
 		const std::vector<RGBPixel>& pixels() { return _pixels; }
 
-		const std::string& filePath() { return _file_path; }
+		const std::string& file_path() { return _file_path; }
 
 		uint32_t width() { return _width; }
 		uint32_t height() { return _height; }
-		uint32_t bitDepth() { return _bit_depth; }
+		uint32_t bit_depth() { return _bit_depth; }
 		uint32_t channels() { return _channels; }
 };
 #endif /* ifndef _RGB_IMAGE_H_ */

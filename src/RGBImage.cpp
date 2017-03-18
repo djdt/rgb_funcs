@@ -37,7 +37,7 @@ void png_read_iostream(png_struct* png_ptr, png_byte* data, png_size_t len)
 	reinterpret_cast<std::istream*>(a)->read(reinterpret_cast<char*>(data), len);
 }
 
-bool RGBImage::loadPngFile(const std::string& file)
+bool RGBImage::LoadPngFile(const std::string& file)
 {
 	png_byte png_sig[8];
 	png_byte** row_ptrs = nullptr;
@@ -158,7 +158,7 @@ bool RGBImage::loadPngFile(const std::string& file)
 	return true;
 }
 
-bool RGBImage::loadJpegFile(const std::string& file)
+bool RGBImage::LoadJpegFile(const std::string& file)
 {
 	FILE* fp = std::fopen(file.c_str(), "rb");
 
