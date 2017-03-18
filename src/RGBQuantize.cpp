@@ -4,10 +4,10 @@
 #include <iostream>
 #include <cmath>
 
-struct RGBCompare
+struct RGBChannelCompare
 {
 	const uint8_t _ch;
-	RGBCompare(const uint8_t ch) : _ch(ch) {}
+	RGBChannelCompare(const uint8_t ch) : _ch(ch) {}
 	bool operator() (const RGBPixel& p1, const RGBPixel& p2) {
 		return (p1[_ch] < p2[_ch]);
 	}
@@ -16,17 +16,12 @@ struct RGBCompare
 	}
 };
 
-struct MMCQBlock
-{
-	std::vector<RGBPixel> _pixels;
-	uint8_t _max_channel;
-};
-
-std::pair<uint8_t,uint8_t> getMaxRangeAndChannel(std::vector<RGBPixel>& pix)
+std::pair<uint8_t,uint8_t> GetMaxRangeAndChannel(
+		std::vector<RGBPixel>& pix)
 {
 	std::pair<uint8_t,uint8_t> range_and_channel;
 	for (uint8_t ch = 0; ch < 3; ++ch) {
-		auto minmax_el = std::minmax_element(pix.begin(), pix.end(), RGBCompare(ch));
+		auto minmax_el = std::minmax_element(pix.begin(), pix.end(), RGBChannelCompare(ch));
 
 		uint8_t range = (*minmax_el.second)[ch] - (*minmax_el.first)[ch];
 		if (range > range_and_channel.first) {
@@ -37,7 +32,7 @@ std::pair<uint8_t,uint8_t> getMaxRangeAndChannel(std::vector<RGBPixel>& pix)
 	return range_and_channel;
 }
 
-double getChannelMean(std::vector<RGBPixel>& pix, uint8_t channel)
+double GetChannelMean(std::vector<RGBPixel>& pix, uint8_t channel)
 {
 	double sum = 0;
 	for (auto p : pix) {
@@ -46,24 +41,8 @@ double getChannelMean(std::vector<RGBPixel>& pix, uint8_t channel)
 	return (sum / static_cast<double>(pix.size()));
 }
 
-/* std::vector<RGBPixel> splitVectorAtChannelMean(std::vector<RGBPixel>& pix, uint8_t channel) */
-/* { */
-/* 	double sum = 0; */
-/* 	for (auto p : pix) { */
-/* 		sum += p[channel]; */
-/* 	} */
-/* 	double mean = (sum / static_cast<double>(pix.size())); */
-/* 	auto split_it = std::lower_bound(pix.begin(), pix.end(), mean, RGBCompare(channel)); */
-
-/* 	std::vector<RGBPixel> second_half(std::make_move_iterator(split_it), */
-/* 			std::make_move_iterator(pix.end())); */
-/* 	pix.erase(split_it, pix.end()); */
-
-/* 	return second_half; */
-/* } */
-
 std::pair<std::vector<RGBPixel>, std::vector<RGBPixel>>
-splitVectorByChannelMean(std::vector<RGBPixel>& pix, uint8_t channel)
+SplitVectorByChannelMean(std::vector<RGBPixel>& pix, uint8_t channel)
 {
 	double sum = 0;
 	for (auto p : pix) {
@@ -71,8 +50,7 @@ splitVectorByChannelMean(std::vector<RGBPixel>& pix, uint8_t channel)
 	}
 	double mean = (sum / static_cast<double>(pix.size()));
 
-	std::vector<RGBPixel> pix_lower;
-	std::vector<RGBPixel> pix_upper;
+	std::vector<RGBPixel> pix_lower, pix_upper;
 	for(auto p : pix) {
 		if (p[channel] < mean) {
 			pix_lower.push_back(p);
@@ -83,7 +61,7 @@ splitVectorByChannelMean(std::vector<RGBPixel>& pix, uint8_t channel)
 	return {pix_lower, pix_upper};
 }
 
-RGBPixel reduceToMean(const std::vector<RGBPixel>& pix)
+RGBPixel ReduceToMean(const std::vector<RGBPixel>& pix)
 {
 	std::array<double, 3> means {{0.0, 0.0, 0.0}};
 
@@ -94,24 +72,35 @@ RGBPixel reduceToMean(const std::vector<RGBPixel>& pix)
 	}
 
 	return {{static_cast<uint8_t>(means[0] / pix.size()),
-		      static_cast<uint8_t>(means[1] / pix.size()),
-			    static_cast<uint8_t>(means[2] / pix.size())}};
+		       static_cast<uint8_t>(means[1] / pix.size()),
+			     static_cast<uint8_t>(means[2] / pix.size())}};
 }
 
-std::vector<RGBPixel> rgb::extractColors_mmc(RGBImage& img, uint8_t iters)
+uint32_t GetCellIndex(const RGBPixel& p, double cell_size)
+{
+	uint32_t index = 0;
+	for (uint8_t i = 0; i < 3; ++i) {
+		index += i * static_cast<uint32_t>(p[i] / cell_size);
+	}
+	return index;
+}
+
+std::vector<RGBPixel> rgbquant::ExtractColors_MedianCut(
+		RGBImage& img, uint8_t num_colors, uint8_t iters)
 {
 	std::vector<std::vector<RGBPixel>> buckets;
 	buckets.push_back(img.pixels());
 
+	// Split the vectors in buckets in half at the mean value,
+	// do this 'iters' times for 2^'iters' buckets
 	for (uint8_t i = 0; i < iters; ++i) {
 		std::vector<std::vector<RGBPixel>> tmp;
 		tmp.reserve(buckets.size() * 2);
 
 		for (auto b : buckets) {
-			auto range_channel = getMaxRangeAndChannel(b);
-			/* std::sort(b.begin(), b.end(), RGBCompare(range_channel.second)); */
+			auto range_channel = GetMaxRangeAndChannel(b);
 
-			auto halves = splitVectorByChannelMean(
+			auto halves = SplitVectorByChannelMean(
 					b, range_channel.second);
 
 			tmp.push_back(std::move(halves.first));
@@ -120,9 +109,45 @@ std::vector<RGBPixel> rgb::extractColors_mmc(RGBImage& img, uint8_t iters)
 		buckets = std::move(tmp);
 	}
 
+	// Select the 'num_colors' most populated buckets and erase rest
+	std::sort(buckets.begin(), buckets.end(),[]
+			(const std::vector<RGBPixel>& a, const std::vector<RGBPixel>& b) {
+				return a.size() < b.size();
+			});
+	buckets.erase(buckets.begin(), buckets.end() - num_colors);
+	
+	// Return the average of the remaining buckets
 	std::vector<RGBPixel> colors;
 	for (auto b : buckets) {
-		colors.push_back(reduceToMean(b));
+		colors.push_back(ReduceToMean(b));
 	}
+
+	return colors;
+}
+
+std::vector<RGBPixel> rgbquant::ExtractColors_Histogram(
+		RGBImage& img, uint8_t num_colors, uint8_t partitions)
+{
+	std::vector<std::vector<RGBPixel>> buckets;
+	buckets.resize(partitions * partitions * partitions);
+
+	double cell_size = 256.0 / static_cast<double>(partitions);
+
+	for (auto p : img.pixels()) {
+		uint32_t index = GetCellIndex(p, cell_size);
+		buckets[index].push_back(p);
+	}
+
+	std::sort(buckets.begin(), buckets.end(),[]
+			(const std::vector<RGBPixel>& a, const std::vector<RGBPixel>& b) {
+				return a.size() < b.size();
+			});
+	buckets.erase(buckets.begin(), buckets.end() - num_colors);
+
+	std::vector<RGBPixel> colors;
+	for (auto c : buckets) {
+		colors.push_back(ReduceToMean(c));
+	}
+
 	return colors;
 }
