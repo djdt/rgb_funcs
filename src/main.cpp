@@ -2,7 +2,7 @@
 #include <string>
 
 #include "RGBImage.hpp"
-#include "RGBQuantize.hpp"
+#include "rgbqize.hpp"
 
 #include <gnuplot-iostream.h>
 /* #include "RGBImageGPext.hpp" */
@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
 
 	std::cout << img << std::endl;
 
-	auto colors = rgbquant::ExtractColors_MedianCut(img, 8, 5);
+	auto colors = rgbq::ExtractColors_MedianCut(img, 8, 5);
 
 	// Plot
 	Gnuplot gp;

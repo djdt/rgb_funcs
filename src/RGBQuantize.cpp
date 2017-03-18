@@ -1,27 +1,30 @@
-#include "RGBQuantize.hpp"
+#include "rgbqize.hpp"
 
 #include <algorithm>
 #include <iostream>
 #include <cmath>
 
-struct RGBChannelCompare
+rgbq::RGBChannelCompare::RGBChannelCompare(const uint8_t ch)
+	: _ch(ch) {}
+bool rgbq::RGBChannelCompare::operator() (
+		const RGBPixel& p1, const RGBPixel& p2)
 {
-	const uint8_t _ch;
-	RGBChannelCompare(const uint8_t ch) : _ch(ch) {}
-	bool operator() (const RGBPixel& p1, const RGBPixel& p2) {
-		return (p1[_ch] < p2[_ch]);
-	}
-	bool operator() (const RGBPixel& p, const double d) {
-		return (p[_ch] < d);
-	}
-};
+	return (p1[_ch] < p2[_ch]);
+}
+
+bool rgbq::RGBChannelCompare::operator() (
+		const RGBPixel& p, const double d)
+{
+	return (p[_ch] < d);
+}
 
 std::pair<uint8_t,uint8_t> GetMaxRangeAndChannel(
 		std::vector<RGBPixel>& pix)
 {
 	std::pair<uint8_t,uint8_t> range_and_channel;
 	for (uint8_t ch = 0; ch < 3; ++ch) {
-		auto minmax_el = std::minmax_element(pix.begin(), pix.end(), RGBChannelCompare(ch));
+		auto minmax_el = std::minmax_element(pix.begin(), pix.end(),
+				rgbq::RGBChannelCompare(ch));
 
 		uint8_t range = (*minmax_el.second)[ch] - (*minmax_el.first)[ch];
 		if (range > range_and_channel.first) {
@@ -76,7 +79,7 @@ RGBPixel ReduceToMean(const std::vector<RGBPixel>& pix)
 			     static_cast<uint8_t>(means[2] / pix.size())}};
 }
 
-std::vector<RGBPixel> rgbquant::ExtractColors_MedianCut(
+std::vector<RGBPixel> rgbq::ExtractColors_MedianCut(
 		RGBImage& img, uint8_t num_colors, uint8_t iters)
 {
 	std::vector<std::vector<RGBPixel>> buckets;
@@ -117,7 +120,7 @@ std::vector<RGBPixel> rgbquant::ExtractColors_MedianCut(
 	return colors;
 }
 
-std::vector<RGBPixel> rgbquant::ExtractColors_Histogram(
+std::vector<RGBPixel> rgbq::ExtractColors_Histogram(
 		RGBImage& img, uint8_t num_colors, uint8_t partitions)
 {
 	std::vector<std::vector<RGBPixel>> buckets;
