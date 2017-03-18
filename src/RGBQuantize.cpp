@@ -76,15 +76,6 @@ RGBPixel ReduceToMean(const std::vector<RGBPixel>& pix)
 			     static_cast<uint8_t>(means[2] / pix.size())}};
 }
 
-uint32_t GetCellIndex(const RGBPixel& p, double cell_size)
-{
-	uint32_t index = 0;
-	for (uint8_t i = 0; i < 3; ++i) {
-		index += i * static_cast<uint32_t>(p[i] / cell_size);
-	}
-	return index;
-}
-
 std::vector<RGBPixel> rgbquant::ExtractColors_MedianCut(
 		RGBImage& img, uint8_t num_colors, uint8_t iters)
 {
@@ -110,12 +101,13 @@ std::vector<RGBPixel> rgbquant::ExtractColors_MedianCut(
 	}
 
 	// Select the 'num_colors' most populated buckets and erase rest
-	std::sort(buckets.begin(), buckets.end(),[]
-			(const std::vector<RGBPixel>& a, const std::vector<RGBPixel>& b) {
+	if (num_colors < buckets.size()) {
+		std::sort(buckets.begin(), buckets.end(),[]
+				(const std::vector<RGBPixel>& a, const std::vector<RGBPixel>& b) {
 				return a.size() < b.size();
-			});
-	buckets.erase(buckets.begin(), buckets.end() - num_colors);
-	
+				});
+		buckets.erase(buckets.begin(), buckets.end() - num_colors);
+	}
 	// Return the average of the remaining buckets
 	std::vector<RGBPixel> colors;
 	for (auto b : buckets) {
@@ -133,17 +125,25 @@ std::vector<RGBPixel> rgbquant::ExtractColors_Histogram(
 
 	double cell_size = 256.0 / static_cast<double>(partitions);
 
+	// Calculate which bucket the pixel belongs using x,y,z pos
 	for (auto p : img.pixels()) {
-		uint32_t index = GetCellIndex(p, cell_size);
+		uint32_t index = 0;
+		for (uint8_t i = 0; i < 3; ++i) {
+			index += i * static_cast<uint32_t>(p[i] / cell_size);
+		}
 		buckets[index].push_back(p);
 	}
 
-	std::sort(buckets.begin(), buckets.end(),[]
-			(const std::vector<RGBPixel>& a, const std::vector<RGBPixel>& b) {
+	// Reduce buckets to number of colors required
+	if (num_colors < buckets.size()) {
+		std::sort(buckets.begin(), buckets.end(),[]
+				(const std::vector<RGBPixel>& a, const std::vector<RGBPixel>& b) {
 				return a.size() < b.size();
-			});
-	buckets.erase(buckets.begin(), buckets.end() - num_colors);
+				});
+		buckets.erase(buckets.begin(), buckets.end() - num_colors);
+	}
 
+	// Return average of remaining buckets
 	std::vector<RGBPixel> colors;
 	for (auto c : buckets) {
 		colors.push_back(ReduceToMean(c));
