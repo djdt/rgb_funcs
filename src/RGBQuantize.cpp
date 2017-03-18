@@ -1,8 +1,7 @@
-#include "rgbqize.hpp"
+#include "RGBQuantize.hpp"
 
 #include <algorithm>
 #include <iostream>
-#include <cmath>
 
 rgbq::RGBChannelCompare::RGBChannelCompare(const uint8_t ch)
 	: _ch(ch) {}
