@@ -223,91 +223,24 @@ std::vector<RGBPixel> rgbq::ExtractColors_KMeans(
 	return means;
 }
 
-struct OctreeNode
-{
-	uint32_t refs = 0;
-	uint32_t index = 0;
-	uint32_t r = 0;
-	uint32_t g = 0;
-	uint32_t b = 0;
-
-	OctreeNode* parent = nullptr;
-	uint32_t num_children = 0;
-	std::array<OctreeNode*, 8> children = {{nullptr}};
-};
-
-uint32_t GetOctreeAddress(const RGBPixel& p, uint8_t offset)
-{
-	return (p[0] >> offset & 0x01) + (2 * (p[1] >> offset & 0x01)) + (3 * (p[2] >> offset & 0x01));
-}
-
-OctreeNode* OctreeInsert(OctreeNode* root, const RGBPixel& p, uint8_t levels)
-{
-	uint8_t depth = 0;
-	for (uint8_t bit = 1 << 7; ++depth < levels; bit >>= 1) {
-		uint8_t i = (0x01 & (p[0] & bit)) * 0x04 +
-			          (0x01 & (p[1] & bit)) * 0x02 +
-								(0x01 & (p[2] & bit));
-		if (!root->children[i]) {
-			root->children[i] = new OctreeNode;
-			root->num_children += 1;
-			root->children[i]->parent = root;
-			root->children[i]->index = i;
-		}
-		root = root->children[i];
-	}
-	root->r += p[0];
-	root->g += p[1];
-	root->b += p[2];
-	root->refs += 1;
-
-	return root;
-}
-
-OctreeNode* OctreeFold(OctreeNode* node)
-{
-	OctreeNode* parent = node->parent;
-	parent->r += node->r;
-	parent->g += node->g;
-	parent->b += node->b;
-	parent->refs += node->refs;
-
-	parent->num_children -= 1;
-	parent->children[node->index] = nullptr;
-	delete parent->children[node->index];
-
-	if (parent->num_children == 0) {
-		return parent;
-	}
-	return nullptr;
-}
+#include "RGBOctree.hpp"
 
 std::vector<RGBPixel> rgbq::ExtractColors_Octree(
-		RGBImage& img, uint32_t num_colors, uint8_t levels)
+		RGBImage& img, uint32_t num_colors, uint8_t max_depth)
 {
-	OctreeNode* root = new OctreeNode;
+	RGBOctree octree;
 
-	std::vector<OctreeNode*> leaves;
 	for (auto p : img.pixels()) {
-		leaves.push_back(OctreeInsert(root, p, levels));
+		octree.Insert(p, max_depth);
 	}
 
-	while (leaves.size() > num_colors) {
-		std::cout << leaves.size() << std::endl;
-		std::vector<OctreeNode*> new_leaves;
-		for (auto l : leaves) {
-			OctreeNode* parent = OctreeFold(l);
-			if (parent) {
-				new_leaves.push_back(parent);
-			}
-		}
-		leaves.clear();
-		leaves = std::move(new_leaves);
+	while (octree.CountLeaves() > num_colors) {
+		octree.ReduceDepth();
 	}
 
 	// Return average of remaining leaves
 	std::vector<RGBPixel> colors;
-	for (auto l : leaves) {
+	for (auto l : octree.GetLeaves()) {
 		colors.push_back(
 				{{static_cast<uint8_t>(l->r / l->refs),
 				  static_cast<uint8_t>(l->g / l->refs),
