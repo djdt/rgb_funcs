@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <random>
 
 rgbq::RGBChannelCompare::RGBChannelCompare(const uint8_t ch)
 	: _ch(ch) {}
@@ -152,4 +153,72 @@ std::vector<RGBPixel> rgbq::ExtractColors_Histogram(
 	}
 
 	return colors;
+}
+
+double RelDistanceBetweenPoints(const RGBPixel& p1, const RGBPixel& p2)
+{
+	return (p1[0] - p2[0]) * (p1[0] - p2[0]) +
+				 (p1[1] - p2[1]) * (p1[1] - p2[1]) +
+				 (p1[2] - p2[2]) * (p1[2] - p2[2]);
+}
+
+std::vector<RGBPixel> rgbq::ExtractColors_KMeans(
+		RGBImage& img, uint8_t k)
+{
+	// Select k random starting points
+	std::random_device rd;
+	std::default_random_engine gen(rd());
+	std::uniform_int_distribution<uint32_t> rand_i(0, img.pixels().size());
+
+	std::vector<RGBPixel> means;
+	means.reserve(k);
+	for (uint8_t i = 0; i < k; ++i) {
+		means.push_back(img.pixels()[rand_i(gen)]);
+	}
+
+	uint32_t info_iters = 0;
+
+	bool means_changed = true;
+	while (means_changed) {
+		means_changed = false;
+
+		std::vector<std::vector<RGBPixel>> buckets;
+		buckets.resize(k);
+
+		// Find closest mean for each pixel
+		for (auto p : img.pixels()) {
+			uint32_t closest_k = 0;
+			double   closest_dist = std::numeric_limits<double>::max();
+
+			for (uint32_t i = 0; i < k; ++i) {
+				double dist = RelDistanceBetweenPoints(p, means[i]);
+				if (dist < closest_dist) {
+					closest_dist = dist;
+					closest_k = i;
+				}
+			}
+			// Add all to bucket of closest mean
+			buckets[closest_k].push_back(p);
+		}
+
+		// Calculate new means
+		std::vector<RGBPixel> new_means;
+		new_means.reserve(k);
+		for (auto b : buckets) {
+			new_means.push_back(ReduceToMean(b));
+		}
+
+		// Compare means to see if changed
+		for (uint8_t i = 0; i < k; ++i) {
+			if (means[i] != new_means[i]) {
+				means_changed = true;
+				break;
+			}
+		}
+		means = std::move(new_means);
+		info_iters++;
+	}
+
+	std::cout << "iters: " << info_iters << std::endl;
+	return means;
 }

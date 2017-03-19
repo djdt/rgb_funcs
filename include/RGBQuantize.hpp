@@ -19,6 +19,8 @@ namespace rgbq
 			RGBImage& img, uint8_t num_colors, uint8_t iters);
 	std::vector<RGBPixel> ExtractColors_Histogram(
 			RGBImage& img, uint8_t num_colors, uint8_t partitions);
+	std::vector<RGBPixel> ExtractColors_KMeans(
+			RGBImage& img, uint8_t k);
 }
 
 #endif /* ifndef _RGB_QUANTIZE_H_ */
