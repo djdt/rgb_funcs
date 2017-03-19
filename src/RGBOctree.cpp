@@ -1,4 +1,5 @@
 #include "RGBOctree.hpp"
+#include <iostream>
 
 RGBOctree::RGBOctree(uint32_t _depth)
 {
@@ -11,14 +12,40 @@ RGBOctree::RGBOctree(uint32_t _depth)
 	parent = nullptr;
 }
 
+bool RGBOctree::IsLeaf()
+{
+	for (auto&c : children) {
+		if (c != nullptr) {
+			return false;
+		}
+	}
+	return true;
+}
+
+std::vector<RGBOctree*> RGBOctree::GetAllNodes()
+{
+	std::vector<RGBOctree*> nodes;
+	nodes.push_back(this);
+
+	for (auto& c : children) {
+		if (c != nullptr) {
+			auto v = c->GetAllNodes();
+			std::move(v.begin(), v.end(), std::back_inserter(nodes));
+		}
+	}
+	return nodes;
+}
+
 uint32_t RGBOctree::CountLeaves()
 {
-	auto leaves = GetLeaves();
-	return leaves.size();
+	return GetLeaves().size();
 }
 
 std::vector<RGBOctree*> RGBOctree::GetLeaves()
 {
+	if (IsLeaf()) {
+		return {this};
+	}
 	std::vector<RGBOctree*> leaves;
 
 	for (const auto& c : children) {
@@ -28,6 +55,19 @@ std::vector<RGBOctree*> RGBOctree::GetLeaves()
 		}
 	}
 	return leaves;
+}
+
+std::vector<RGBOctree*> RGBOctree::GetLeafParents()
+{
+	std::vector<RGBOctree*> leaf_parents = {this};
+
+	for (auto& c : children) {
+		if (c != nullptr && !c->IsLeaf()) {
+			auto v = c->GetLeafParents();
+			std::move(v.begin(), v.end(), std::back_inserter(leaf_parents));
+		}
+	}
+	return leaf_parents;
 }
 
 void RGBOctree::Fold()
@@ -41,11 +81,13 @@ void RGBOctree::Fold()
 void RGBOctree::ReduceDepth()
 {
 	for (auto& c : children) {
-		if (c == nullptr) {
-			c->Fold();
-			c.release();
-		} else {
-			c->ReduceDepth();
+		if (c != nullptr) {
+			if (c->IsLeaf()) {
+				c->Fold();
+				c.release();
+			} else {
+				c->ReduceDepth();
+			}
 		}
 	}
 }
@@ -62,9 +104,9 @@ RGBOctree* RGBOctree::Insert(const RGBPixel& p, uint8_t max_depth)
 
 	uint8_t bit_mask = 1 << (7 - depth);
 
-	uint8_t i = (0x01 & (p[0] & bit_mask)) * 4 +
-							(0x01 & (p[1] & bit_mask)) * 2 +
-							(0x01 & (p[2] & bit_mask));
+	uint8_t i = (!!(p[0] & bit_mask)) * 4 +
+							(!!(p[1] & bit_mask)) * 2 +
+							(!!(p[2] & bit_mask));
 
 	if (children[i] == nullptr) {
 			children[i] = std::make_unique<RGBOctree>(depth + 1);

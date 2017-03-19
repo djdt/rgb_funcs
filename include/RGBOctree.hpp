@@ -16,8 +16,14 @@ struct RGBOctree
 
 	RGBOctree(uint32_t _depth = 0);
 
+
+	std::vector<RGBOctree*> GetAllNodes();
+
+	bool IsLeaf();
 	uint32_t CountLeaves();
 	std::vector<RGBOctree*> GetLeaves();
+	std::vector<RGBOctree*> GetLeafParents();
+
 	void Fold();
 	void ReduceDepth();
 
