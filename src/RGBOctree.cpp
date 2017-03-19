@@ -23,7 +23,8 @@ std::vector<RGBOctree*> RGBOctree::GetLeaves()
 
 	for (const auto& c : children) {
 		if (c != nullptr) {
-			leaves.emplace_back(c->GetLeaves());
+			auto v = c->GetLeaves();
+			std::move(v.begin(), v.end(), std::back_inserter(leaves));
 		}
 	}
 	return leaves;

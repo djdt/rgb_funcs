@@ -234,7 +234,9 @@ std::vector<RGBPixel> rgbq::ExtractColors_Octree(
 		octree.Insert(p, max_depth);
 	}
 
+	uint32_t it = 1;
 	while (octree.CountLeaves() > num_colors) {
+	std::cout << "iter: " << it << ", leaves: " << octree.CountLeaves() << std::endl;
 		octree.ReduceDepth();
 	}
 
