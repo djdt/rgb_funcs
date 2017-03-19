@@ -124,6 +124,8 @@ int main(int argc, char* argv[])
 		colors = rgbq::ExtractColors_Histogram(img, num_colors, algorithm_var);
 	} else if (algorithm == "kmeans") {
 		colors = rgbq::ExtractColors_KMeans(img, num_colors);
+	} else if (algorithm == "octree") {
+		colors = rgbq::ExtractColors_Octree(img, num_colors, algorithm_var);
 	} else {
 		std::cerr << "Invalid algorithm!" << std::endl;
 		PrintUsage(argv[0]);

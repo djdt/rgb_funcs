@@ -274,7 +274,7 @@ OctreeNode* OctreeFold(OctreeNode* node)
 
 	parent->num_children -= 1;
 	parent->children[node->index] = nullptr;
-	delete node;
+	delete parent->children[node->index];
 
 	if (parent->num_children == 0) {
 		return parent;
@@ -282,7 +282,8 @@ OctreeNode* OctreeFold(OctreeNode* node)
 	return nullptr;
 }
 
-std::vector<RGBPixel> ExtractColors_Octree(RGBImage& img, uint32_t num_colors, uint32_t levels)
+std::vector<RGBPixel> rgbq::ExtractColors_Octree(
+		RGBImage& img, uint32_t num_colors, uint8_t levels)
 {
 	OctreeNode* root = new OctreeNode;
 
@@ -292,6 +293,7 @@ std::vector<RGBPixel> ExtractColors_Octree(RGBImage& img, uint32_t num_colors, u
 	}
 
 	while (leaves.size() > num_colors) {
+		std::cout << leaves.size() << std::endl;
 		std::vector<OctreeNode*> new_leaves;
 		for (auto l : leaves) {
 			OctreeNode* parent = OctreeFold(l);
