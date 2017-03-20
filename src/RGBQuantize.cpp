@@ -238,15 +238,20 @@ std::vector<RGBPixel> rgbq::ExtractColors_Octree(
 		octree.ReduceDepth();
 	}
 
-	// DELTE EXTRAS HERE
+	// Sort octree nodes by number of refs
+	std::vector<RGBOctree*> buckets = octree.GetLeaves();
+	if (buckets.size() > num_colors) {
+		std::sort(buckets.begin(), buckets.end(),[]
+				(const RGBOctree* a, const RGBOctree* b) {
+					return (a->refs() < b->refs());
+				});
+		buckets.erase(buckets.begin(), buckets.end() - num_colors);
+	}
 
 	// Return average of remaining leaves
 	std::vector<RGBPixel> colors;
-	for (auto l : octree.GetLeaves()) {
-		colors.push_back(
-				{{static_cast<uint8_t>(l->r / l->refs),
-				  static_cast<uint8_t>(l->g / l->refs),
-					static_cast<uint8_t>(l->b / l->refs)}});
+	for (auto b : buckets) {
+		colors.push_back(b->GetMeanColor());
 	}
 
 	return colors;

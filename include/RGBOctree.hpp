@@ -6,28 +6,31 @@
 
 #include "RGBImage.hpp"
 
-struct RGBOctree
+class RGBOctree
 {
-	uint32_t refs;
-	uint32_t depth;
-	uint32_t r, g, b;
-	RGBOctree* parent;
-	std::array<std::unique_ptr<RGBOctree>, 8> children;
+	private:
+		RGBOctree* _parent;
 
-	RGBOctree(uint32_t _depth = 0);
+		uint32_t _refs, _depth;
+		uint32_t _r, _g, _b;
 
+		std::array<std::unique_ptr<RGBOctree>, 8> _children;
 
-	std::vector<RGBOctree*> GetAllNodes();
+		bool IsLeaf();
+		void Fold();
 
-	bool IsLeaf();
-	uint32_t CountLeaves();
-	std::vector<RGBOctree*> GetLeaves();
-	std::vector<RGBOctree*> GetLeafParents();
+	public:
+		RGBOctree(RGBOctree* parent = nullptr, uint32_t depth = 0);
 
-	void Fold();
-	void ReduceDepth();
+		std::vector<RGBOctree*> GetAllChildren();
+		std::vector<RGBOctree*> GetLeaves();
+		std::vector<RGBOctree*> GetLeafParents();
+		const RGBPixel GetMeanColor();
 
-	RGBOctree* Insert(const RGBPixel& p, uint8_t max_depth);
+		void ReduceDepth();
+		RGBOctree* Insert(const RGBPixel& p, uint8_t max_depth);
+
+		uint32_t refs() const { return _refs; }
 };
 
 #endif /* ifndef _RGB_OCTREE_H_ */
