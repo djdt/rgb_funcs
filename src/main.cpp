@@ -19,9 +19,10 @@ void PrintUsage(const std::string& name)
 		<< "\t-p, --plot\t\t\t\tplots the input image.\n"
 		<< "\t-o, --output FILENAME\n"
 		<< "\t-t, --terminal GP_TERM\t\t\tthe gnuplot terminal.\n"
-		<< "ALGORITHM: eg. mmc|mmc,4|hist\n"
-		<< "\tValid algorithms are mmc, hist and kmeans.\n"
-		<< "\tPass aditional params such as mmc iterations and hist partitions using comma.\n"
+		<< "ALGORITHM: eg. mmc|mmc,4|hist|octree,8\n"
+		<< "\tValid algorithms are mmc, hist, octree and kmeans.\n"
+		<< "\tPass aditional params such as median cut iterations,\n"
+		<< "\thistogram partitions and octree depth using comma.\n"
 		<< std::endl;
 }
 
