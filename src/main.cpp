@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
 				algorithm = std::string(argv[++i]);
 				auto comma = algorithm.find_first_of(',');
 				if (comma < algorithm.length()) {
-					algorithm_var = std::stoi(algorithm.substr(comma));
+					algorithm_var = std::stoi(algorithm.substr(comma + 1));
 					algorithm = algorithm.substr(0, comma);
 				}
 			} else {
