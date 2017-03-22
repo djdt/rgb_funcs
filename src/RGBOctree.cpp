@@ -84,7 +84,7 @@ void RGBOctree::ReduceDepth()
 		if (c != nullptr) {
 			if (c->IsLeaf()) {
 				c->Fold();
-				c.release();
+				c.reset();
 			} else {
 				c->ReduceDepth();
 			}
