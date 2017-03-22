@@ -3,17 +3,8 @@
 
 #include <array>
 #include <cstdint>
-#include <fstream>
 #include <string>
 #include <vector>
-
-/* struct RGBPixel { */
-/* 	RGBPixel() : r(0), g(0), b(0) {} */
-/* 	RGBPixel(uint8_t _r, uint8_t _g, uint8_t _b) */
-/* 		: r(_r), g(_g), b(_b) {} */
-
-/* 	uint8_t r, g, b; */
-/* }; */
 
 typedef std::array<uint8_t, 3> RGBPixel;
 

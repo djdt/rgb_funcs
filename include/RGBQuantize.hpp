@@ -4,7 +4,6 @@
 #include <vector>
 #include "RGBImage.hpp"
 
-
 namespace rgbq
 {
 	struct RGBChannelCompare
