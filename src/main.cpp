@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
 	bool plot_image        = false;
 	bool sort_image        = false;
 	uint32_t num_colors    = 8;
-	uint32_t algorithm_var = 4; // mmc iters, hist partions, etc.
+	uint32_t algorithm_var = 5; // mmc iters, hist partions, etc.
 	std::string algorithm  = "octree";
 	std::string output     = "";
 	std::string terminal   = "pngcairo";
@@ -126,11 +126,9 @@ int main(int argc, char* argv[])
 	}
 
 	std::cout << img << std::endl;
-	std::vector<RGBPixel> pix = img.pixels();
-
-	std::cout << "Extracting colors..." << std::endl;
 
 	// Extract colors
+	std::cout << "Extracting colors..." << std::endl;
 	std::vector<RGBPixel> colors;
 
 	if (algorithm == "mmc") {
@@ -163,6 +161,8 @@ int main(int argc, char* argv[])
 	}
 
 	// Sorting
+	std::vector<RGBPixel> pix = img.pixels();
+
 	if (sort_image) {
 		std::cout << "Sorting pixles..." << std::endl;
 		std::sort(pix.begin(), pix.end(),
