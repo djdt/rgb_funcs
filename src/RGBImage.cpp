@@ -1,6 +1,8 @@
 #include "RGBImage.hpp"
 
 #include <iostream>
+#include <fstream>
+
 #include <png.h>
 #include <jpeglib.h>
 
@@ -189,6 +191,7 @@ bool RGBImage::LoadJpegFile(const std::string& file)
 		return false;
 	}
 
+	_file_path = file;
 	_width = cinfo.output_width;
 	_height = cinfo.output_height;
 	_channels = cinfo.output_components;
