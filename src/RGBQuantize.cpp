@@ -4,6 +4,8 @@
 #include <iostream>
 #include <random>
 
+#include "RGBOctree.hpp"
+
 rgbq::RGBChannelCompare::RGBChannelCompare(const uint8_t ch)
 	: _ch(ch) {}
 bool rgbq::RGBChannelCompare::operator() (
@@ -34,15 +36,6 @@ std::pair<uint8_t,uint8_t> GetMaxRangeAndChannel(
 	}
 	return range_and_channel;
 }
-
-/* double GetChannelMean(std::vector<RGBPixel>& pix, uint8_t channel) */
-/* { */
-/* 	double sum = 0; */
-/* 	for (auto p : pix) { */
-/* 		sum += p[channel]; */
-/* 	} */
-/* 	return (sum / static_cast<double>(pix.size())); */
-/* } */
 
 std::pair<std::vector<RGBPixel>, std::vector<RGBPixel>>
 SplitVectorByChannelMean(std::vector<RGBPixel>& pix, uint8_t channel)
@@ -80,7 +73,7 @@ RGBPixel ReduceToMean(const std::vector<RGBPixel>& pix)
 }
 
 std::vector<RGBPixel> rgbq::ExtractColors_MedianCut(
-		const std::vector<RGBPixel>& pixels, uint8_t num_colors, uint8_t iters)
+		const std::vector<RGBPixel>& pixels, uint32_t num_colors, uint32_t iters)
 {
 	std::vector<std::vector<RGBPixel>> buckets;
 	buckets.push_back(pixels);
@@ -121,7 +114,7 @@ std::vector<RGBPixel> rgbq::ExtractColors_MedianCut(
 }
 
 std::vector<RGBPixel> rgbq::ExtractColors_Histogram(
-		const std::vector<RGBPixel>& pixels, uint8_t num_colors, uint8_t partitions)
+		const std::vector<RGBPixel>& pixels, uint32_t num_colors, uint32_t partitions)
 {
 	std::vector<std::vector<RGBPixel>> buckets;
 	buckets.resize(partitions * partitions * partitions);
@@ -163,8 +156,18 @@ double RelDistanceBetweenPoints(const RGBPixel& p1, const RGBPixel& p2)
 }
 
 std::vector<RGBPixel> rgbq::ExtractColors_KMeans(
-		const std::vector<RGBPixel>& pixels, uint8_t k)
+		const std::vector<RGBPixel>& pixels, uint32_t k, uint32_t every_n_pixel)
 {
+	// Reduce num of pixels to improve performance
+	std::vector<RGBPixel> reduced;
+	if (every_n_pixel > 1) {
+		reduced.reserve(pixels.size() / every_n_pixel);
+		for (auto it = pixels.begin(); it != pixels.end(); it += 4) {
+			reduced.push_back(*it);
+		}
+	} else {
+		reduced = std::move(pixels);
+	}
 	// Select k random starting points
 	std::random_device rd;
 	std::default_random_engine gen(rd());
@@ -186,7 +189,7 @@ std::vector<RGBPixel> rgbq::ExtractColors_KMeans(
 		buckets.resize(k);
 
 		// Find closest mean for each pixel
-		for (auto p : pixels) {
+		for (auto p : reduced) {
 			uint32_t closest_k = 0;
 			double   closest_dist = std::numeric_limits<double>::max();
 
@@ -222,10 +225,8 @@ std::vector<RGBPixel> rgbq::ExtractColors_KMeans(
 	return means;
 }
 
-#include "RGBOctree.hpp"
-
 std::vector<RGBPixel> rgbq::ExtractColors_Octree(
-		const std::vector<RGBPixel>& pixels, uint32_t num_colors, uint8_t max_depth)
+		const std::vector<RGBPixel>& pixels, uint32_t num_colors, uint32_t max_depth)
 {
 	RGBOctree octree;
 

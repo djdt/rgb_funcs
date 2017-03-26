@@ -17,13 +17,13 @@ namespace rgbq
 	};
 
 	std::vector<RGBPixel> ExtractColors_MedianCut(
-			const std::vector<RGBPixel>& pixels, uint8_t num_colors, uint8_t iters);
+			const std::vector<RGBPixel>& pixels, uint32_t num_colors, uint32_t iters);
 	std::vector<RGBPixel> ExtractColors_Histogram(
-			const std::vector<RGBPixel>& pixels, uint8_t num_colors, uint8_t partitions);
+			const std::vector<RGBPixel>& pixels, uint32_t num_colors, uint32_t partitions);
 	std::vector<RGBPixel> ExtractColors_KMeans(
-			const std::vector<RGBPixel>& pixels, uint8_t k);
+			const std::vector<RGBPixel>& pixels, uint32_t k, uint32_t every_n_pixel);
 	std::vector<RGBPixel> ExtractColors_Octree(
-			const std::vector<RGBPixel>& pixels, uint32_t num_colors, uint8_t max_depth);
+			const std::vector<RGBPixel>& pixels, uint32_t num_colors, uint32_t max_depth);
 }
 
 #endif /* ifndef _RGB_QUANTIZE_H_ */
