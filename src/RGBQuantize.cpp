@@ -80,10 +80,10 @@ RGBPixel ReduceToMean(const std::vector<RGBPixel>& pix)
 }
 
 std::vector<RGBPixel> rgbq::ExtractColors_MedianCut(
-		RGBImage& img, uint8_t num_colors, uint8_t iters)
+		const std::vector<RGBPixel>& pixels, uint8_t num_colors, uint8_t iters)
 {
 	std::vector<std::vector<RGBPixel>> buckets;
-	buckets.push_back(img.pixels());
+	buckets.push_back(pixels);
 
 	// Split the vectors in buckets in half at the mean value,
 	// do this 'iters' times for 2^'iters' buckets
@@ -121,7 +121,7 @@ std::vector<RGBPixel> rgbq::ExtractColors_MedianCut(
 }
 
 std::vector<RGBPixel> rgbq::ExtractColors_Histogram(
-		RGBImage& img, uint8_t num_colors, uint8_t partitions)
+		const std::vector<RGBPixel>& pixels, uint8_t num_colors, uint8_t partitions)
 {
 	std::vector<std::vector<RGBPixel>> buckets;
 	buckets.resize(partitions * partitions * partitions);
@@ -129,7 +129,7 @@ std::vector<RGBPixel> rgbq::ExtractColors_Histogram(
 	double cell_size = 256.0 / static_cast<double>(partitions);
 
 	// Calculate which bucket the pixel belongs using x,y,z pos
-	for (auto p : img.pixels()) {
+	for (auto p : pixels) {
 		uint32_t index = 0;
 		for (uint8_t i = 0; i < 3; ++i) {
 			index += i * static_cast<uint32_t>(p[i] / cell_size);
@@ -163,17 +163,17 @@ double RelDistanceBetweenPoints(const RGBPixel& p1, const RGBPixel& p2)
 }
 
 std::vector<RGBPixel> rgbq::ExtractColors_KMeans(
-		RGBImage& img, uint8_t k)
+		const std::vector<RGBPixel>& pixels, uint8_t k)
 {
 	// Select k random starting points
 	std::random_device rd;
 	std::default_random_engine gen(rd());
-	std::uniform_int_distribution<uint32_t> rand_i(0, img.pixels().size());
+	std::uniform_int_distribution<uint32_t> rand_i(0, pixels.size());
 
 	std::vector<RGBPixel> means;
 	means.reserve(k);
 	for (uint8_t i = 0; i < k; ++i) {
-		means.push_back(img.pixels()[rand_i(gen)]);
+		means.push_back(pixels[rand_i(gen)]);
 	}
 
 	uint32_t info_iters = 0;
@@ -186,7 +186,7 @@ std::vector<RGBPixel> rgbq::ExtractColors_KMeans(
 		buckets.resize(k);
 
 		// Find closest mean for each pixel
-		for (auto p : img.pixels()) {
+		for (auto p : pixels) {
 			uint32_t closest_k = 0;
 			double   closest_dist = std::numeric_limits<double>::max();
 
@@ -226,11 +226,11 @@ std::vector<RGBPixel> rgbq::ExtractColors_KMeans(
 #include "RGBOctree.hpp"
 
 std::vector<RGBPixel> rgbq::ExtractColors_Octree(
-		RGBImage& img, uint32_t num_colors, uint8_t max_depth)
+		const std::vector<RGBPixel>& pixels, uint32_t num_colors, uint8_t max_depth)
 {
 	RGBOctree octree;
 
-	for (auto p : img.pixels()) {
+	for (auto p : pixels) {
 		octree.Insert(p, max_depth);
 	}
 
