@@ -219,7 +219,6 @@ std::vector<RGBPixel> rgbq::ExtractColors_KMeans(
 		info_iters++;
 	}
 
-	std::cout << "iters: " << info_iters << std::endl;
 	return means;
 }
 
