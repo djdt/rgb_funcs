@@ -20,8 +20,6 @@ class RGBImage
 		uint32_t _bit_depth;
 		uint32_t _channels;
 
-		RGBPixel GetSquare(uint32_t px, uint32_t py, uint32_t size);
-
 	public:
 		RGBImage();
 		~RGBImage();
@@ -31,8 +29,6 @@ class RGBImage
 
 		bool LoadPngFile (const std::string& file);
 		bool LoadJpegFile(const std::string& file);
-
-		void ReducePixelCount(uint32_t factor);
 
 		const std::vector<RGBPixel>& pixels() { return _pixels; }
 		const std::string& file_path() { return _file_path; }

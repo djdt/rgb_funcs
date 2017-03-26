@@ -218,30 +218,3 @@ bool RGBImage::LoadJpegFile(const std::string& file)
 	fclose(fp);
 	return true;
 }
-
-RGBPixel RGBImage::GetSquare(uint32_t px, uint32_t py, uint32_t size)
-{
-	uint32_t r = 0, g = 0, b = 0;
-	for(uint32_t x = 0; x < size; ++x) {
-		for(uint32_t y = 0; y < size; ++y) {
-			r += _pixels[px + x + (py + y) * _width][0];
-			g += _pixels[px + x + (py + y) * _width][1];
-			b += _pixels[px + x + (py + y) * _width][2];
-		}
-	}
-	return {{static_cast<uint8_t>(r / (size * size)),
-		       static_cast<uint8_t>(g / (size * size)),
-					 static_cast<uint8_t>(b / (size * size))}};
-}
-
-void RGBImage::ReducePixelCount(uint32_t factor)
-{
-	std::vector<RGBPixel> new_pix;
-	new_pix.reserve(_pixels.size() / (factor * factor));
-	for (uint32_t y = 0; y < _height; y += factor) {
-		for (uint32_t x = 0; x < _width; x += factor) {
-			new_pix.push_back(GetSquare(x, y, factor));
-		}
-	}
-	_pixels = std::move(new_pix);
-}
