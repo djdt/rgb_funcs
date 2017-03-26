@@ -2,9 +2,10 @@
 #define _RGB_OCTREE_H_
 
 #include <cstdint>
+#include <vector>
 #include <memory>
 
-#include "RGBImage.hpp"
+typedef std::array<uint8_t, 3> RGBPixel;
 
 class RGBOctree
 {

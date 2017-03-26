@@ -1,8 +1,10 @@
 #ifndef _RGB_QUANTIZE_H_
 #define _RGB_QUANTIZE_H_
 
+#include <array>
 #include <vector>
-#include "RGBImage.hpp"
+
+typedef std::array<uint8_t, 3> RGBPixel;
 
 namespace rgbq
 {
