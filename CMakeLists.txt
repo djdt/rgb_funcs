@@ -17,7 +17,7 @@ include_directories(
 
 file(GLOB_RECURSE sources_cq ${ColorQuant_SOURCE_DIR}/src/*.cpp)
 
-add_executable(ColorQuant ${sources_cq})
+add_library(ColorQuant ${sources_cq})
 
 target_link_libraries(ColorQuant
 	${PNG_LIBRARIES}
