@@ -148,7 +148,7 @@ std::vector<RGBPixel> rgbq::ExtractColors_Histogram(
 	return colors;
 }
 
-double RelDistanceBetweenPoints(const RGBPixel& p1, const RGBPixel& p2)
+double RelativeDistance(const RGBPixel& p1, const RGBPixel& p2)
 {
 	return (p1[0] - p2[0]) * (p1[0] - p2[0]) +
 				 (p1[1] - p2[1]) * (p1[1] - p2[1]) +
@@ -194,7 +194,7 @@ std::vector<RGBPixel> rgbq::ExtractColors_KMeans(
 			double   closest_dist = std::numeric_limits<double>::max();
 
 			for (uint32_t i = 0; i < k; ++i) {
-				double dist = RelDistanceBetweenPoints(p, means[i]);
+				double dist = RelativeDistance(p, means[i]);
 				if (dist < closest_dist) {
 					closest_dist = dist;
 					closest_k = i;
@@ -255,4 +255,26 @@ std::vector<RGBPixel> rgbq::ExtractColors_Octree(
 	}
 
 	return colors;
+}
+
+std::vector<RGBPixel> rgbq::MatchColors(
+		const std::vector<RGBPixel>& colors, const std::vector<RGBPixel>& matches)
+{
+	std::vector<RGBPixel> matched;
+	matched.reserve(8);
+
+	for (auto match : matches) {
+		double near_dist = std::numeric_limits<double>::max();
+		RGBPixel match_color;
+
+		for (auto color : colors) {
+			double dist = RelativeDistance(color, match);
+			if (dist < near_dist) {
+				near_dist = dist;
+				match_color = color;
+			}
+		}
+		matched.push_back(match_color);
+	}
+	return matched;
 }

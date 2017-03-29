@@ -24,6 +24,8 @@ namespace rgbq
 			const std::vector<RGBPixel>& pixels, uint32_t k, uint32_t every_n_pixel);
 	std::vector<RGBPixel> ExtractColors_Octree(
 			const std::vector<RGBPixel>& pixels, uint32_t num_colors, uint32_t max_depth);
+	// Returns a vector of length matches.size() with colors that match cloest with matches.
+	std::vector<RGBPixel> MatchColors(const std::vector<RGBPixel>& colors, const std::vector<RGBPixel>& matches);
 }
 
 #endif /* ifndef _RGB_QUANTIZE_H_ */
