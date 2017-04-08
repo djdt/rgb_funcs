@@ -14,7 +14,7 @@ include_directories(
 
 file(GLOB_RECURSE sources_rgb ${RGBFuncs_SOURCE_DIR}/src/*.cpp)
 
-add_library(ColorQuant ${sources_rgb})
+add_library(RGBFuncs ${sources_rgb})
 
 target_link_libraries(RGBFuncs
 	${PNG_LIBRARIES}
