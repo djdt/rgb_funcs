@@ -6,35 +6,39 @@
 #include <string>
 #include <vector>
 
-typedef std::array<uint8_t, 3> RGBPixel;
-
-class RGBImage
+namespace rgb
 {
-	private:
-		std::vector<RGBPixel> _pixels;
+	typedef std::array<uint8_t, 3> pixel;
 
-		std::string _file_path;
+	class Image
+	{
+		private:
+			std::vector<pixel> _pixels;
 
-		uint32_t _width;
-		uint32_t _height;
-		uint32_t _bit_depth;
-		uint32_t _channels;
+			std::string _file_path;
 
-	public:
-		RGBImage();
-		~RGBImage();
+			uint32_t _width;
+			uint32_t _height;
+			uint32_t _bit_depth;
+			uint32_t _channels;
 
-		friend std::ostream& operator<<(
-				std::ostream& os, const RGBImage& img);
+		public:
+			Image();
+			~Image();
 
-		bool LoadPngFile (const std::string& file);
-		bool LoadJpegFile(const std::string& file);
+			friend std::ostream& operator<<(
+					std::ostream& os, const Image& img);
 
-		const std::vector<RGBPixel>& pixels() { return _pixels; }
-		const std::string& file_path() { return _file_path; }
-		uint32_t width() { return _width; }
-		uint32_t height() { return _height; }
-		uint32_t bit_depth() { return _bit_depth; }
-		uint32_t channels() { return _channels; }
-};
+			bool loadPngFile (const std::string& file);
+			bool loadJpegFile(const std::string& file);
+
+			const std::vector<pixel>& pixels() { return _pixels; }
+			const std::string& file_path() { return _file_path; }
+			uint32_t width() { return _width; }
+			uint32_t height() { return _height; }
+			uint32_t bit_depth() { return _bit_depth; }
+			uint32_t channels() { return _channels; }
+	};
+} /* namespace rgb */
+
 #endif /* ifndef _RGB_IMAGE_H_ */
