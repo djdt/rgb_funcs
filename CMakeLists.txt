@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(RGBFuncs)
+project(rgb_funcs)
 
 set(CMAKE_BUILD_TYPE Release)
 
@@ -7,16 +7,16 @@ find_package(PNG REQUIRED)
 find_package(JPEG REQUIRED)
 
 include_directories(
-	${RGBFuncs_SOURCE_DIR}/include
+	${${PROJECT_NAME}_SOURCE_DIR}/include
 	${PNG_INCLUDE_DIRS}
 	${JPEG_INCLUDE_DIRS}
 )
 
-file(GLOB_RECURSE sources_rgb ${RGBFuncs_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE SRC_FILES ${${PROJECT_NAME}_SOURCE_DIR}/src/*.cpp)
 
-add_library(RGBFuncs ${sources_rgb})
+add_library(${PROJECT_NAME} ${SRC_FILES})
 
-target_link_libraries(RGBFuncs
+target_link_libraries(${PROJECT_NAME}
 	${PNG_LIBRARIES}
 	${JPEG_LIBRARIES}
 )
