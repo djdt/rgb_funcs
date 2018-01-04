@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include "RGBFuncs.hpp"
+
 rgb::ChannelCompare::ChannelCompare(const uint8_t ch)
 	: _ch(ch) {}
 bool rgb::ChannelCompare::operator() (
@@ -51,21 +53,6 @@ splitVectorByChannelMean(std::vector<rgb::pixel>& pix, uint8_t channel)
 		}
 	}
 	return {pix_lower, pix_upper};
-}
-
-rgb::pixel reduceToMean(const std::vector<rgb::pixel>& pix)
-{
-	std::array<double, 3> means {{0.0, 0.0, 0.0}};
-
-	for (auto p : pix) {
-		means[0] += p[0];
-		means[1] += p[1];
-		means[2] += p[2];
-	}
-
-	return {{static_cast<uint8_t>(means[0] / pix.size()),
-		       static_cast<uint8_t>(means[1] / pix.size()),
-			     static_cast<uint8_t>(means[2] / pix.size())}};
 }
 
 std::vector<rgb::pixel> rgb::quantizeMedianCut(

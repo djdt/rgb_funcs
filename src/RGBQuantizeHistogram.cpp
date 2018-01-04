@@ -2,20 +2,7 @@
 
 #include <algorithm>
 
-rgb::pixel reduceToMean(const std::vector<rgb::pixel>& pix)
-{
-	std::array<double, 3> means {{0.0, 0.0, 0.0}};
-
-	for (auto p : pix) {
-		means[0] += p[0];
-		means[1] += p[1];
-		means[2] += p[2];
-	}
-
-	return {{static_cast<uint8_t>(means[0] / pix.size()),
-		       static_cast<uint8_t>(means[1] / pix.size()),
-			     static_cast<uint8_t>(means[2] / pix.size())}};
-}
+#include "RGBFuncs.hpp"
 
 std::vector<rgb::pixel> rgb::quantizeHistogram(
 		const std::vector<rgb::pixel>& pixels, uint32_t num_colors, uint32_t partitions)

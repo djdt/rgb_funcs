@@ -2,12 +2,7 @@
 
 #include <limits>
 
-double relativeDistance(const rgb::pixel& p1, const rgb::pixel& p2)
-{
-	return (p1[0] - p2[0]) * (p1[0] - p2[0]) +
-				 (p1[1] - p2[1]) * (p1[1] - p2[1]) +
-				 (p1[2] - p2[2]) * (p1[2] - p2[2]);
-}
+#include "RGBFuncs.hpp"
 
 std::vector<rgb::pixel> rgb::matchColors(
 		const std::vector<rgb::pixel>& colors, const std::vector<rgb::pixel>& matches)
