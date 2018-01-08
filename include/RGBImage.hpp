@@ -31,6 +31,8 @@ namespace rgb
 
 			bool loadPngFile (const std::string& file);
 			bool loadJpegFile(const std::string& file);
+			void loadPixelData(const std::vector<pixel>& pixels) {
+				_pixels = pixels; }
 
 			const std::vector<pixel>& pixels() { return _pixels; }
 			const std::string& file_path() { return _file_path; }
